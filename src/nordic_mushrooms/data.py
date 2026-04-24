@@ -100,6 +100,10 @@ def resolve_image_path(
         resolved = base / candidate
         if resolved.exists():
             return resolved
+        # Case-insensitive fallback for filesystems that store lowercase extensions
+        resolved_lower = resolved.with_suffix(resolved.suffix.lower())
+        if resolved_lower != resolved and resolved_lower.exists():
+            return resolved_lower
     if images_root is not None:
         return images_root / candidate
     return metadata_path.parent / candidate
