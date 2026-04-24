@@ -11,13 +11,8 @@ from typing import Any
 
 os.environ.setdefault("MPLCONFIGDIR", str(Path.cwd() / ".cache" / "matplotlib"))
 
-try:
-    from tqdm import tqdm as _tqdm
-    def _wrap_loader(loader, desc=""):
-        return _tqdm(loader, desc=desc, leave=False, ncols=90)
-except ImportError:
-    def _wrap_loader(loader, desc=""):
-        return loader
+def _wrap_loader(loader, desc=""):
+    return loader
 
 import matplotlib
 
@@ -545,7 +540,14 @@ def train_model(
     risk_map: dict[str, str],
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     display_name = MODEL_DISPLAY_NAMES.get(model_name, model_name)
-    print(f"\nStarting {display_name} on {device.type}", flush=True)
+    params = count_trainable_parameters(
+        build_model(model_name, len(class_keys), pretrained=False)
+    ) / 1e6
+    print(f"\n{'═' * 62}", flush=True)
+    print(f"  {display_name}  ({params:.1f}M params)  —  device: {device.type}", flush=True)
+    print(f"{'═' * 62}", flush=True)
+    print(f"  {'Ep':>3}  {'Train':>6}  {'Val':>6}  {'Top3':>6}  {'F1':>6}  {'Danger':>6}  {'Time':>7}", flush=True)
+    print(f"  {'─'*3}  {'─'*6}  {'─'*6}  {'─'*6}  {'─'*6}  {'─'*6}  {'─'*7}", flush=True)
 
     model = build_model(model_name, len(class_keys), pretrained=config.pretrained).to(device)
     criterion = nn.CrossEntropyLoss(
@@ -603,14 +605,17 @@ def train_model(
         history["val_f1"].append(val_metrics["f1_macro"])
         history["val_balanced_accuracy"].append(val_metrics["balanced_accuracy"])
 
+        mins, secs = divmod(int(elapsed), 60)
+        improved = score > best_score
         print(
-            f"[{display_name}] Epoch {epoch + 1}/{config.epochs} | "
-            f"train_top1={train_accuracy:.3f} "
-            f"val_top1={val_metrics['accuracy']:.3f} "
-            f"val_top3={val_metrics['top3_accuracy']:.3f} "
-            f"val_f1={val_metrics['f1_macro']:.3f} "
-            f"val_dangerous={val_metrics['dangerous_error_rate']:.3f} "
-            f"time={elapsed:.1f}s",
+            f"  {epoch + 1:>3}  "
+            f"{train_accuracy:>5.1%}  "
+            f"{val_metrics['accuracy']:>5.1%}  "
+            f"{val_metrics['top3_accuracy']:>5.1%}  "
+            f"{val_metrics['f1_macro']:>5.1%}  "
+            f"{val_metrics['dangerous_error_rate']:>5.1%}  "
+            f"{mins:>4}m{secs:02d}s"
+            f"{' ✓' if improved else ''}",
             flush=True,
         )
 
@@ -671,11 +676,13 @@ def train_model(
     )
     save_csv(abstention_rows, output_dir / f"{model_name}_abstention.csv")
 
+    print(f"\n  TEST RESULTS — {display_name}", flush=True)
+    print(f"  {'Top-1':>10}  {'Top-3':>10}  {'Macro F1':>10}  {'Danger':>10}", flush=True)
     print(
-        f"[{display_name}] Test top1={test_metrics['accuracy']:.3f} "
-        f"top3={test_metrics['top3_accuracy']:.3f} "
-        f"macro_f1={test_metrics['f1_macro']:.3f} "
-        f"dangerous_error_rate={test_metrics['dangerous_error_rate']:.3f}",
+        f"  {test_metrics['accuracy']:>10.1%}  "
+        f"{test_metrics['top3_accuracy']:>10.1%}  "
+        f"{test_metrics['f1_macro']:>10.1%}  "
+        f"{test_metrics['dangerous_error_rate']:>10.1%}",
         flush=True,
     )
 
