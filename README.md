@@ -1,65 +1,74 @@
-# Mushroom Risk Classification with ResNet and Successor Models
+# Risk-Aware Nordic Mushroom Recognition with ResNet and Successor Models
 
-This project is a clean rebuild of the course experiment around one task only: **4-class mushroom risk classification**. The baseline model is **ResNet-50** from *Deep Residual Learning for Image Recognition* (CVPR 2016 Best Paper), and it is compared against three later architectures:
+This repository contains the coursework implementation for a **species-first mushroom recognition project** built around the CVPR 2016 Best Paper **ResNet** baseline and three later CNN architectures:
 
-- `resnet50` -> baseline
-- `resnext50_32x4d` -> successor architecture with aggregated residual transformations
-- `densenet121` -> later high-performing CNN that cites and outperforms ResNet on standard benchmarks
-- `seresnet50` -> ResNet with squeeze-and-excitation attention
+- `resnet50` -> **Deep Residual Learning for Image Recognition** (baseline, CVPR 2016 Best Paper)
+- `resnext50_32x4d` -> **Aggregated Residual Transformations for Deep Neural Networks** (CVPR 2017)
+- `seresnet50` -> **Squeeze-and-Excitation Networks** (CVPR 2018 Best Paper)
+- `convnext_tiny` -> **A ConvNet for the 2020s** (CVPR 2022)
 
-The task is intentionally framed as a **research prototype**, not a real safety tool. The key question is whether later architectures improve mushroom risk recognition while also reducing **dangerous mistakes**, where unsafe mushrooms are predicted as safe.
+Instead of training on coarse folder labels such as “edible” or “poisonous”, the project is framed as:
+
+1. **Recognize Nordic mushroom species from field images**
+2. **Map species predictions to safety risk labels**
+3. **Measure dangerous confusions and confidence-based abstention**
+
+That makes the project more faithful to real foraging situations in Scandinavia, where the real challenge is often species confusion, not binary safety labels.
 
 ## Research Question
 
-**Which fine-tuned architecture performs best on 4-class mushroom risk classification, and does a stronger architecture lower the dangerous error rate on poisonous and deadly mushrooms compared with the original ResNet baseline?**
+**How well do ResNet-based architectures recognize Nordic wild mushroom species from field images, and can confidence-based abstention reduce dangerous confusions between edible and poisonous species?**
+
+## Why This Matters
+
+The Norwegian Poisons Information Centre warns that poisonous mushrooms in Norway can be confused with edible species and that people should only eat mushrooms they are **100% sure** are safe. This makes risk-aware visual recognition a relevant computer vision problem for Norwegian and Scandinavian society, even if the final system is strictly a research prototype and not a real safety tool.
+
+## Dataset Choice
+
+The intended dataset family is **Danish Fungi 2020 (DF20)**, a taxonomy-accurate fine-grained benchmark built from the Atlas of Danish Fungi. The code in this repository is written to support:
+
+- a **single metadata file** with a split column
+- or **separate train/test metadata files**
+- optional validation metadata
+- local image folders downloaded from the official DF20/DF24 repository
+
+The training pipeline is metadata-driven rather than hardcoded to one folder structure, so it can support the official DF20 release, the newer DF24 split, or a course subset built from the same metadata format.
+
+## Main Project Idea
+
+The main experiment compares four ImageNet-pretrained CNNs on a **species classification task**. Risk is then used as an **analysis layer**:
+
+- species classification is the supervised task
+- species predictions are mapped to `edible`, `conditionally_edible`, `poisonous`, `deadly`, or `unknown`
+- dangerous mistakes are counted when a truly unsafe species is predicted as safe
+- an abstention analysis checks whether requiring higher confidence reduces dangerous errors
 
 ## Project Structure
 
 ```text
-CVproject-rebuild/
+IKT460_CVproject/
+  data/
+    risk_map.csv          ← species-to-risk lookup (94 species)
+    df20/                 ← DF20 metadata CSVs (images gitignored)
   notebooks/
-    mushroom_risk_comparison.ipynb
+    analysis.ipynb        ← main analysis notebook
+  outputs/                ← training results (gitignored)
   scripts/
-    train_mushroom_models.py
+    train.py              ← CLI entry point for training
+    download.py           ← DF20 dataset setup helper
   src/
-    mushroom_risk/
+    nordic_mushrooms/
       __init__.py
       data.py
       models.py
+      risk.py
       training.py
       utils.py
   README.md
   requirements.txt
 ```
 
-## Dataset
-
-The experiment uses the Kaggle dataset:
-
-`derekkunowilliams/mushrooms`
-
-The loader:
-
-- downloads through `kagglehub` if needed
-- reuses the local cache if the dataset is already present
-- infers the 4 risk labels from folder names:
-  - `edible`
-  - `conditionally_edible`
-  - `poisonous`
-  - `deadly`
-
-## Metrics
-
-The comparison focuses on:
-
-- test accuracy
-- balanced accuracy
-- macro F1
-- dangerous error rate
-
-`dangerous_error_rate` is the fraction of truly unsafe mushrooms (`poisonous` or `deadly`) that were incorrectly predicted as safe (`edible` or `conditionally_edible`).
-
-## Install
+## Installation
 
 ```bash
 python3 -m venv .venv
@@ -67,53 +76,124 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Train the Four Models
+## Expected Data Inputs
+
+You need:
+
+- the DF20 or DF24 image files locally
+- at least one metadata table with:
+  - an image path column
+  - a species/scientific-name column
+  - optionally a split column
+
+If the official dataset gives you **separate train/test metadata files**, use those directly.
+
+## Example Training Commands
+
+### 1. One metadata file with a split column
 
 ```bash
-python3 scripts/train_mushroom_models.py \
+python3 scripts/train_df20_models.py \
+  --metadata-path /path/to/df20_metadata.csv \
+  --images-root /path/to/df20_images_300px \
   --models resnet50 resnext50_32x4d densenet121 seresnet50 \
-  --epochs 12 \
-  --batch-size 8 \
-  --output-dir outputs/mushroom_comparison
+  --top-species 100 \
+  --min-images-per-species 30 \
+  --epochs 15 \
+  --batch-size 16 \
+  --output-dir outputs/df20_species_project
 ```
 
-For a quick smoke test:
+### 2. Separate train/test metadata files
 
 ```bash
-python3 scripts/train_mushroom_models.py \
+python3 scripts/train_df20_models.py \
+  --train-metadata-path /path/to/train_metadata.csv \
+  --test-metadata-path /path/to/test_metadata.csv \
+  --images-root /path/to/df20_images_300px \
+  --models resnet50 resnext50_32x4d densenet121 seresnet50 \
+  --top-species 100 \
+  --min-images-per-species 30 \
+  --epochs 15 \
+  --batch-size 16 \
+  --output-dir outputs/df20_species_project
+```
+
+### 3. Fast smoke test
+
+```bash
+python3 scripts/train_df20_models.py \
+  --metadata-path /path/to/metadata.csv \
+  --images-root /path/to/images \
   --models resnet50 \
+  --top-species 4 \
+  --min-images-per-species 2 \
+  --max-images-per-species 4 \
   --epochs 1 \
   --batch-size 2 \
-  --max-images-per-class 4 \
-  --output-dir outputs/smoke
+  --output-dir outputs/smoke_df20
 ```
 
-## Notebook Workflow
+## Metrics
 
-Open `notebooks/mushroom_risk_comparison.ipynb`.
+The saved comparison focuses on:
 
-The notebook is set up to:
+- top-1 accuracy
+- top-3 accuracy
+- balanced accuracy
+- macro F1
+- risk coverage
+- risk accuracy
+- dangerous error rate
 
-- load finished results by default
-- summarize metrics from `outputs/mushroom_comparison/results.csv`
-- display the comparison plot
-- display per-class metrics
-- display confusion matrices for each model
+`dangerous_error_rate` is the fraction of truly unsafe mushrooms (`poisonous` or `deadly`) that are predicted as safe (`edible` or `conditionally_edible`).
 
-Set `RUN_TRAINING = True` only if you deliberately want to launch training from inside the notebook.
+## Saved Outputs
 
-## Output Files
-
-Each run saves:
+Each full run saves:
 
 - `metadata.json`
 - `results.csv`
 - `model_comparison.png`
+- `abstention_comparison.png`
 - one checkpoint per model
-- one training curve per model
-- one confusion matrix per model
+- one training-history plot per model
+- one risk confusion matrix per model
 - one per-class metrics CSV per model
+- one prediction CSV per model
+- one top-confusions CSV per model
+- one abstention CSV per model
+
+## Notebook Workflow
+
+Open `notebooks/df20_species_project.ipynb`.
+
+The notebook is designed to:
+
+- load finished results by default
+- summarize `results.csv`
+- display the comparison plots
+- compare abstention behaviour across models
+- inspect the most important risky confusions
+
+Keep `RUN_TRAINING = False` unless you intentionally want to launch training from inside the notebook.
+
+## Important Modeling Choices
+
+- **Species-first supervision**: the model learns species labels, not risk folders
+- **Risk-aware evaluation**: safety is analyzed after prediction using a curated species-to-risk map
+- **Weighted sampling**: enabled by default to soften the long-tail distribution
+- **Confidence abstention**: included to support a “defer to expert” safety story
+- **Top-species subset**: enabled so the course experiment can stay tractable while still using a real DF20-style benchmark
 
 ## Safety Note
 
-This repository is for coursework and research only. Mushroom identification is safety-critical, and the predictions produced here must **not** be used to decide whether a mushroom is safe to eat.
+This repository is for coursework and research only. It must **not** be used to decide whether a mushroom is safe to eat.
+
+## Source Links
+
+- Official CVPR awards list: [IEEE CVPR Paper Awards](https://tc.computer.org/tcpami/awards/cvpr-paper-awards/)
+- ResNet paper: [Deep Residual Learning for Image Recognition](https://openaccess.thecvf.com/content_cvpr_2016/html/He_Deep_Residual_Learning_CVPR_2016_paper.html)
+- DF20 paper: [Danish Fungi 2020 - Not Just Another Image Recognition Dataset](https://researchprofiles.ku.dk/en/publications/danish-fungi-2020-not-just-another-image-recognition-dataset)
+- DF20 dataset/code repository: [BohemianVRA/DanishFungiDataset](https://github.com/BohemianVRA/DanishFungiDataset)
+- Norwegian mushroom safety guidance: [Poisonous mushrooms in Norway - Helsenorge](https://www.helsenorge.no/en/poison-information/poisonous-mushrooms/)

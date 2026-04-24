@@ -7,8 +7,8 @@ from torchvision import models
 MODEL_DISPLAY_NAMES = {
     "resnet50": "ResNet-50",
     "resnext50_32x4d": "ResNeXt-50 32x4d",
-    "densenet121": "DenseNet-121",
     "seresnet50": "SE-ResNet-50",
+    "convnext_tiny": "ConvNeXt-Tiny",
 }
 
 
@@ -27,11 +27,11 @@ def build_model(model_name: str, num_classes: int, pretrained: bool = True) -> n
         model.fc = nn.Linear(model.fc.in_features, num_classes)
         return model
 
-    if model_name == "densenet121":
-        model = models.densenet121(
-            weights=models.DenseNet121_Weights.DEFAULT if pretrained else None
+    if model_name == "convnext_tiny":
+        model = models.convnext_tiny(
+            weights=models.ConvNeXt_Tiny_Weights.DEFAULT if pretrained else None
         )
-        model.classifier = nn.Linear(model.classifier.in_features, num_classes)
+        model.classifier[2] = nn.Linear(model.classifier[2].in_features, num_classes)
         return model
 
     if model_name == "seresnet50":

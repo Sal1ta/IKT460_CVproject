@@ -198,6 +198,14 @@ outputs/
 models/*.pt
 models/*.pth
 
+# DF20 dataset — all large files ignored; download via scripts/download.py
+data/df20/DF20_300/
+data/df20/images/
+data/df20/images_300px/
+data/df20/*.tar.gz
+data/df20/*.zip
+data/df20/*.csv
+
 # PyPI configuration file
 .pypirc
 

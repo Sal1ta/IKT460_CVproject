@@ -1,0 +1,95 @@
+species_key,species_name,risk_label,source_note
+amanita_virosa,Amanita virosa,deadly,Helsenorge; destroying angel; alpha-amanitin; easily confused with edible Amanita species
+amanita_phalloides,Amanita phalloides,deadly,Helsenorge; death cap; alpha-amanitin; responsible for majority of fatal mushroom poisonings worldwide
+amanita_verna,Amanita verna,deadly,Spring destroying angel; alpha-amanitin; confused with Agaricus or edible Amanita
+amanita_ocreata,Amanita ocreata,deadly,Western destroying angel; alpha-amanitin
+cortinarius_rubellus,Cortinarius rubellus,deadly,Helsenorge; deadly webcap; orellanine; delayed kidney failure weeks after ingestion
+cortinarius_orellanus,Cortinarius orellanus,deadly,Helsenorge; fool's webcap; orellanine; delayed kidney failure
+cortinarius_speciosissimus,Cortinarius speciosissimus,deadly,Splendid webcap; orellanine; Scandinavian poisoning cases documented
+galerina_marginata,Galerina marginata,deadly,Helsenorge; deadly skullcap; alpha-amanitin; resembles honey fungus and sheathed woodtuft
+lepiota_castanea,Lepiota castanea,deadly,Helsenorge; chestnut dapperling; alpha-amanitin
+lepiota_boudieri,Lepiota boudieri,deadly,Helsenorge; dapperling; alpha-amanitin
+lepiota_brunneoincarnata,Lepiota brunneoincarnata,deadly,Deadly dapperling; alpha-amanitin; mistaken for edible parasols
+paxillus_involutus,Paxillus involutus,deadly,Helsenorge; brown roll-rim; causes autoimmune hemolytic anemia; fatalities reported after repeated consumption
+amanita_muscaria,Amanita muscaria,poisonous,Helsenorge; fly agaric; ibotenic acid and muscimol; psychoactive and toxic
+amanita_pantherina,Amanita pantherina,poisonous,Helsenorge; panther cap; ibotenic acid; more potent than muscaria; confused with edible species
+amanita_regalis,Amanita regalis,poisonous,Helsenorge; royal fly agaric; ibotenic acid; Nordic variant of muscaria
+amanita_citrina,Amanita citrina,poisonous,False death cap; mildly toxic; similar appearance to deadly species; distinctive raw potato smell
+amanita_excelsa,Amanita excelsa,poisonous,Grey spotted amanita; often confused with pantherina; toxic
+gyromitra_esculenta,Gyromitra esculenta,poisonous,Helsenorge; false morel; gyromitrin metabolises to MMH; toxic raw; dangerous cooking fumes; not safe to eat
+russula_emetica,Russula emetica,poisonous,Helsenorge; sickener; GI toxins; bright red cap
+russula_mairei,Russula mairei,poisonous,Beechwood sickener; acrid and toxic; GI irritant
+clitocybe_rivulosa,Clitocybe rivulosa,poisonous,Helsenorge; fool's funnel; muscarine; can cause cardiac arrest
+clitocybe_dealbata,Clitocybe dealbata,poisonous,Ivory funnel; muscarine; easily confused with edible meadow species
+inocybe_erubescens,Inocybe erubescens,poisonous,Red-staining inocybe; muscarine; cardiac risk; fatalities reported
+inocybe_rimosa,Inocybe rimosa,poisonous,Split fibrecap; muscarine; common in parks and roadsides
+entoloma_sinuatum,Entoloma sinuatum,poisonous,Lead poisoner; severe GI toxin; common cause of mushroom poisoning in Europe
+hypholoma_fasciculare,Hypholoma fasciculare,poisonous,Sulphur tuft; fasciculol toxins; GI irritant; very common in clusters on wood
+scleroderma_citrinum,Scleroderma citrinum,poisonous,Common earthball; GI toxin; mistaken for puffball; purple-black interior
+tricholoma_pardinum,Tricholoma pardinum,poisonous,Toxic knight; severe GI toxin; widespread poisoning cases in Europe
+tricholoma_equestre,Tricholoma equestre,poisonous,Yellow knight; rhabdomyolysis; multiple fatalities in France; formerly considered edible
+boletus_satanas,Boletus satanas,poisonous,Satan's bolete; GI toxin; red pores; avoided by experienced foragers
+agaricus_xanthodermus,Agaricus xanthodermus,poisonous,Yellow-staining mushroom; GI toxin; smells of ink or phenol; yellows immediately when cut
+hebeloma_crustuliniforme,Hebeloma crustuliniforme,poisonous,Poison pie; GI toxin; radish smell; common cause of poisoning
+omphalotus_olearius,Omphalotus olearius,poisonous,Jack-o-lantern; GI toxin; luminescent gills; confused with chanterelles
+hygrophoropsis_aurantiaca,Hygrophoropsis aurantiaca,poisonous,False chanterelle; GI irritant; toxic; superficially resembles chanterelle; forked gills
+laccaria_amethystina,Laccaria amethystina,poisonous,Amethyst deceiver; accumulates arsenic from soil; toxic from contaminated sites
+cortinarius_caerulescens,Cortinarius caerulescens,poisonous,Blue webcap; toxic; contains orellanine traces
+leccinum_versipelle,Leccinum versipelle,conditionally_edible,Helsenorge; orange birch bolete; raw causes severe GI issues; must be well-cooked; discolours when cut
+morchella_esculenta,Morchella esculenta,conditionally_edible,True morel; excellent edible only when thoroughly cooked; toxic raw (monomethylhydrazine traces)
+morchella_elata,Morchella elata,conditionally_edible,Black morel; edible only when thoroughly cooked; toxic raw
+morchella_vulgaris,Morchella vulgaris,conditionally_edible,Common morel; edible only when cooked
+verpa_bohemica,Verpa bohemica,conditionally_edible,Early false morel; gyromitrin traces; must be cooked; some classify as inedible
+armillaria_mellea,Armillaria mellea,conditionally_edible,Honey fungus; edible when well-cooked; GI issues if undercooked or eaten raw; can grow near Galerina
+lactarius_torminosus,Lactarius torminosus,conditionally_edible,Woolly milkcap; must be pickled or blanched; acrid and GI toxic raw; traditional Nordic use when preserved
+cantharellus_cibarius,Cantharellus cibarius,edible,Common chanterelle; Norway's most popular wild mushroom; excellent edible; no dangerous lookalikes when correctly identified
+cantharellus_pallens,Cantharellus pallens,edible,Pale chanterelle; excellent edible; same culinary value as cibarius
+cantharellus_friesii,Cantharellus friesii,edible,Frisian chanterelle; small edible chanterelle
+craterellus_tubaeformis,Craterellus tubaeformis,edible,Trumpet chanterelle; excellent autumn edible; common Nordic species; confused with deadly webcap in some guides
+craterellus_cornucopioides,Craterellus cornucopioides,edible,Horn of plenty; black chanterelle; excellent edible; very safe to identify
+craterellus_lutescens,Craterellus lutescens,edible,Golden chanterelle; excellent edible; yellow-orange version of cornucopioides
+boletus_edulis,Boletus edulis,edible,Porcini; king bolete; excellent edible; commercially important Nordic species
+boletus_pinophilus,Boletus pinophilus,edible,Pine bolete; excellent edible; late summer to autumn
+boletus_reticulatus,Boletus reticulatus,edible,Summer cep; excellent edible; summer to early autumn
+hydnum_repandum,Hydnum repandum,edible,Hedgehog mushroom; excellent beginner species; no dangerous lookalikes; spiny underside
+hydnum_rufescens,Hydnum rufescens,edible,Rufous hedgehog; edible; smaller than repandum; autumn
+macrolepiota_procera,Macrolepiota procera,edible,Parasol mushroom; excellent large edible; distinctive movable ring; must check for dangerous Lepiota lookalikes
+chlorophyllum_rhacodes,Chlorophyllum rhacodes,edible,Shaggy parasol; edible when cooked; can cause GI upset in sensitive individuals
+coprinus_comatus,Coprinus comatus,edible,Shaggy ink cap; excellent when young and white; do not consume with alcohol
+lactarius_deliciosus,Lactarius deliciosus,edible,Saffron milk cap; excellent edible; orange latex; pine forests
+lactarius_deterrimus,Lactarius deterrimus,edible,False saffron milkcap; edible; orange latex; spruce forests
+suillus_luteus,Suillus luteus,edible,Slippery jack; edible; remove slimy cuticle before cooking; under pines
+suillus_variegatus,Suillus variegatus,edible,Velvet bolete; edible; under pines
+suillus_bovinus,Suillus bovinus,edible,Bovine bolete; edible; under pines
+suillus_grevillei,Suillus grevillei,edible,Larch bolete; edible; exclusively under larch
+agaricus_campestris,Agaricus campestris,edible,Field mushroom; excellent edible; meadows and grassland
+agaricus_bisporus,Agaricus bisporus,edible,Button mushroom; widely cultivated; excellent edible
+agaricus_silvicola,Agaricus silvicola,edible,Wood mushroom; edible; anise smell; check yellowing to distinguish from xanthodermus
+pleurotus_ostreatus,Pleurotus ostreatus,edible,Oyster mushroom; excellent edible; common on dead wood; cultivated widely
+calocybe_gambosa,Calocybe gambosa,edible,St George's mushroom; spring edible; meadows and woodland edges
+hericium_erinaceus,Hericium erinaceus,edible,Lion's mane; excellent edible; no dangerous lookalikes; distinctive appearance
+sparassis_crispa,Sparassis crispa,edible,Cauliflower mushroom; excellent edible; at base of pine trees; no dangerous lookalikes
+grifola_frondosa,Grifola frondosa,edible,Hen of the woods; excellent edible; at base of oak
+calvatia_gigantea,Calvatia gigantea,edible,Giant puffball; edible when young and entirely white inside; no toxic lookalikes if interior is white
+russula_cyanoxantha,Russula cyanoxantha,edible,Charcoal burner; one of the safest edible russulas; non-acrid; mixed woodland
+russula_vesca,Russula vesca,edible,Bare-toothed russula; excellent mild edible; flesh does not discolour
+russula_claroflava,Russula claroflava,edible,Yellow swamp russula; edible; wet woodland; greys slowly
+russula_xerampelina,Russula xerampelina,edible,Crab brittlegill; edible; distinctive seafood smell
+russula_integra,Russula integra,edible,Entire russula; edible; mild taste
+russula_virescens,Russula virescens,edible,Greencracked brittlegill; excellent edible; cracked green-grey cap
+leccinum_scabrum,Leccinum scabrum,edible,Brown birch bolete; edible when cooked; common under birch
+leccinum_aurantiacum,Leccinum aurantiacum,edible,Orange oak bolete; edible when cooked; dramatic flesh darkening
+leccinum_holopus,Leccinum holopus,edible,Bog bolete; edible; pale; boggy birch woodland
+lepista_nuda,Lepista nuda,edible,Wood blewit; edible; distinctive lilac colour; must be cooked
+lepista_saeva,Lepista saeva,edible,Field blewit; edible; autumn grassland
+tricholoma_portentosum,Tricholoma portentosum,edible,Dingy knight; good edible; late autumn under conifers
+tricholoma_matsutake,Tricholoma matsutake,edible,Matsutake; highly prized edible; pine forests; commercial importance in Norway
+cortinarius_caperatus,Cortinarius caperatus,edible,Gypsy mushroom; good edible despite being Cortinarius; distinctive wrinkled cap and veil
+clitocybe_odora,Clitocybe odora,edible,Aniseed funnel; edible; very distinctive anise smell
+flammulina_velutipes,Flammulina velutipes,edible,Velvet shank; edible; cultivated as enoki; winter species on dead wood
+kuehneromyces_mutabilis,Kuehneromyces mutabilis,edible,Sheathed woodtuft; edible; important not to confuse with deadly Galerina marginata
+hygrophorus_marzuolus,Hygrophorus marzuolus,edible,March webcap; edible; early spring under conifers
+ramaria_botrytis,Ramaria botrytis,edible,Cauliflower coral; edible; choose carefully as many Ramaria species are questionable
+cantharellus_aurora,Cantharellus aurora,edible,Golden chanterelle; edible
+hygrophorus_hypothejus,Hygrophorus hypothejus,edible,Herald of winter; edible; late autumn pine forests
+lycoperdon_perlatum,Lycoperdon perlatum,edible,Common puffball; edible when young and interior is white; similar to giant puffball
