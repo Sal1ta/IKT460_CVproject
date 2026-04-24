@@ -89,13 +89,48 @@ If the official dataset gives you **separate train/test metadata files**, use th
 
 ## Example Training Commands
 
+### Simple default command
+
+If the DF20 files are in the expected folder:
+
+```text
+data/df20/DF20-train_metadata_PROD-2.csv
+data/df20/DF20-public_test_metadata_PROD-2.csv
+data/df20/DF20_300/
+```
+
+then the normal 4-model comparison can be started with:
+
+```bash
+python run.py
+```
+
+For a faster check with only ResNet-50:
+
+```bash
+python run.py --preset quick
+```
+
+For a longer run:
+
+```bash
+python run.py --preset full
+```
+
+On JupyterHub, run it in the background with:
+
+```bash
+nohup python run.py > training.log 2>&1 &
+tail -f training.log
+```
+
 ### 1. One metadata file with a split column
 
 ```bash
-python3 scripts/train_df20_models.py \
+python scripts/train.py \
   --metadata-path /path/to/df20_metadata.csv \
   --images-root /path/to/df20_images_300px \
-  --models resnet50 resnext50_32x4d densenet121 seresnet50 \
+  --models resnet50 resnext50_32x4d seresnet50 convnext_tiny \
   --top-species 100 \
   --min-images-per-species 30 \
   --epochs 15 \
@@ -106,11 +141,11 @@ python3 scripts/train_df20_models.py \
 ### 2. Separate train/test metadata files
 
 ```bash
-python3 scripts/train_df20_models.py \
+python scripts/train.py \
   --train-metadata-path /path/to/train_metadata.csv \
   --test-metadata-path /path/to/test_metadata.csv \
   --images-root /path/to/df20_images_300px \
-  --models resnet50 resnext50_32x4d densenet121 seresnet50 \
+  --models resnet50 resnext50_32x4d seresnet50 convnext_tiny \
   --top-species 100 \
   --min-images-per-species 30 \
   --epochs 15 \
@@ -121,7 +156,7 @@ python3 scripts/train_df20_models.py \
 ### 3. Fast smoke test
 
 ```bash
-python3 scripts/train_df20_models.py \
+python scripts/train.py \
   --metadata-path /path/to/metadata.csv \
   --images-root /path/to/images \
   --models resnet50 \

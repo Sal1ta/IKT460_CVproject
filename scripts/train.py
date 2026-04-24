@@ -8,7 +8,34 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from nordic_mushrooms import ExperimentConfig, run_experiment
+
+DF20_DEFAULT_TRAIN_METADATA = "data/df20/DF20-train_metadata_PROD-2.csv"
+DF20_DEFAULT_TEST_METADATA = "data/df20/DF20-public_test_metadata_PROD-2.csv"
+DF20_DEFAULT_IMAGES_ROOT = "data/df20/DF20_300"
+
+PRESETS = {
+    "quick": {
+        "epochs": 3,
+        "patience": 2,
+        "batch_size": 32,
+        "num_workers": 4,
+        "models": ("resnet50",),
+    },
+    "normal": {
+        "epochs": 6,
+        "patience": 2,
+        "batch_size": 32,
+        "num_workers": 4,
+        "models": None,
+    },
+    "full": {
+        "epochs": 15,
+        "patience": 5,
+        "batch_size": 32,
+        "num_workers": 4,
+        "models": None,
+    },
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -25,12 +52,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--split-column", default=None, help="Override the detected split column.")
     parser.add_argument("--risk-map-path", default="data/risk_map.csv")
     parser.add_argument("--models", nargs="+", default=None)
-    parser.add_argument("--epochs", type=int, default=15)
-    parser.add_argument("--batch-size", type=int, default=16)
+    parser.add_argument(
+        "--preset",
+        choices=sorted(PRESETS),
+        default="normal",
+        help="Training recipe to use when details are not overridden.",
+    )
+    parser.add_argument("--epochs", type=int, default=None)
+    parser.add_argument("--batch-size", type=int, default=None)
     parser.add_argument("--image-size", type=int, default=224)
     parser.add_argument("--learning-rate", type=float, default=3e-4)
-    parser.add_argument("--num-workers", type=int, default=0)
-    parser.add_argument("--patience", type=int, default=5)
+    parser.add_argument("--num-workers", type=int, default=None)
+    parser.add_argument("--patience", type=int, default=None)
     parser.add_argument("--label-smoothing", type=float, default=0.05)
     parser.add_argument("--top-species", type=int, default=100)
     parser.add_argument("--min-images-per-species", type=int, default=30)
@@ -46,24 +79,37 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+
+    from nordic_mushrooms import ExperimentConfig, run_experiment
+
     default_config = ExperimentConfig()
+    preset = PRESETS[args.preset]
+    train_metadata_path = args.train_metadata_path or (
+        DF20_DEFAULT_TRAIN_METADATA if args.metadata_path is None else None
+    )
+    test_metadata_path = args.test_metadata_path or (
+        DF20_DEFAULT_TEST_METADATA if args.metadata_path is None else None
+    )
+    images_root = args.images_root or DF20_DEFAULT_IMAGES_ROOT
+    model_names = tuple(args.models) if args.models else preset["models"] or default_config.model_names
+
     config = ExperimentConfig(
         metadata_path=args.metadata_path,
-        train_metadata_path=args.train_metadata_path,
+        train_metadata_path=train_metadata_path,
         val_metadata_path=args.val_metadata_path,
-        test_metadata_path=args.test_metadata_path,
-        images_root=args.images_root,
+        test_metadata_path=test_metadata_path,
+        images_root=images_root,
         path_column=args.path_column,
         species_column=args.species_column,
         split_column=args.split_column,
         risk_map_path=args.risk_map_path,
-        model_names=tuple(args.models) if args.models else default_config.model_names,
-        epochs=args.epochs,
-        batch_size=args.batch_size,
+        model_names=model_names,
+        epochs=args.epochs or preset["epochs"],
+        batch_size=args.batch_size or preset["batch_size"],
         image_size=args.image_size,
         learning_rate=args.learning_rate,
-        patience=args.patience,
-        num_workers=args.num_workers,
+        patience=args.patience or preset["patience"],
+        num_workers=args.num_workers if args.num_workers is not None else preset["num_workers"],
         top_species=args.top_species if args.top_species and args.top_species > 0 else None,
         min_images_per_species=args.min_images_per_species,
         max_images_per_species=args.max_images_per_species,
