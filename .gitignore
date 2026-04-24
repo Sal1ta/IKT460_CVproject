@@ -194,6 +194,8 @@ cython_debug/
 # Project generated outputs
 outputs/
 .cache/
+*.tar.gz
+*.zip
 .kaggle/
 models/*.pt
 models/*.pth

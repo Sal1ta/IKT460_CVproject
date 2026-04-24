@@ -49,21 +49,20 @@ The main experiment compares four ImageNet-pretrained CNNs on a **species classi
 IKT460_CVproject/
   data/
     risk_map.csv          ← species-to-risk lookup (94 species)
-    df20/                 ← DF20 metadata CSVs (images gitignored)
+    df20/                 ← DF20 metadata CSVs + images (gitignored)
+  nordic_mushrooms/       ← core Python package
+    __init__.py
+    data.py
+    models.py
+    risk.py
+    training.py
+    utils.py
   notebooks/
     analysis.ipynb        ← main analysis notebook
   outputs/                ← training results (gitignored)
   scripts/
     train.py              ← CLI entry point for training
     download.py           ← DF20 dataset setup helper
-  src/
-    nordic_mushrooms/
-      __init__.py
-      data.py
-      models.py
-      risk.py
-      training.py
-      utils.py
   README.md
   requirements.txt
 ```
