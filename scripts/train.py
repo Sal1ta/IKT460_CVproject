@@ -15,22 +15,25 @@ DF20_DEFAULT_IMAGES_ROOT = "data/df20/DF20_300"
 
 PRESETS = {
     "quick": {
-        "epochs": 3,
-        "patience": 2,
+        "epochs": 2,
+        "patience": 1,
+        "min_epochs": 1,
         "batch_size": 32,
         "num_workers": 4,
         "models": ("resnet50",),
     },
     "normal": {
-        "epochs": 6,
+        "epochs": 8,
         "patience": 2,
+        "min_epochs": 4,
         "batch_size": 32,
         "num_workers": 4,
         "models": None,
     },
     "full": {
-        "epochs": 15,
-        "patience": 5,
+        "epochs": 10,
+        "patience": 3,
+        "min_epochs": 6,
         "batch_size": 32,
         "num_workers": 4,
         "models": None,
@@ -59,6 +62,8 @@ def parse_args() -> argparse.Namespace:
         help="Training recipe to use when details are not overridden.",
     )
     parser.add_argument("--epochs", type=int, default=None)
+    parser.add_argument("--min-epochs", type=int, default=None)
+    parser.add_argument("--no-stop-at-perfect", action="store_true")
     parser.add_argument("--batch-size", type=int, default=None)
     parser.add_argument("--image-size", type=int, default=224)
     parser.add_argument("--learning-rate", type=float, default=3e-4)
@@ -92,7 +97,8 @@ def main() -> None:
     )
     images_root = args.images_root or DF20_DEFAULT_IMAGES_ROOT
     model_names = tuple(args.models) if args.models else preset["models"] or default_config.model_names
-
+    epochs = args.epochs or preset["epochs"]
+    patience = args.patience if args.patience is not None else epochs
     config = ExperimentConfig(
         metadata_path=args.metadata_path,
         train_metadata_path=train_metadata_path,
@@ -104,11 +110,13 @@ def main() -> None:
         split_column=args.split_column,
         risk_map_path=args.risk_map_path,
         model_names=model_names,
-        epochs=args.epochs or preset["epochs"],
+        epochs=epochs,
+        min_epochs=args.min_epochs or preset["min_epochs"],
+        stop_at_perfect_train=not args.no_stop_at_perfect,
         batch_size=args.batch_size or preset["batch_size"],
         image_size=args.image_size,
         learning_rate=args.learning_rate,
-        patience=args.patience or preset["patience"],
+        patience=patience,
         num_workers=args.num_workers if args.num_workers is not None else preset["num_workers"],
         top_species=args.top_species if args.top_species and args.top_species > 0 else None,
         min_images_per_species=args.min_images_per_species,

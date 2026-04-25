@@ -64,6 +64,8 @@ class ExperimentConfig:
     image_size: int = 224
     batch_size: int = 16
     epochs: int = 15
+    min_epochs: int = 4
+    stop_at_perfect_train: bool = True
     learning_rate: float = 3e-4
     weight_decay: float = 1e-4
     patience: int = 5
@@ -535,7 +537,7 @@ def train_model(
     species_display_lookup: dict[str, str],
     config: ExperimentConfig,
     device: torch.device,
-    output_dir: Path,
+    output_paths: dict[str, Path],
     class_weights: torch.Tensor | None,
     risk_map: dict[str, str],
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
@@ -575,7 +577,7 @@ def train_model(
     best_score = -1.0
     best_state = None
     stale_epochs = 0
-    checkpoint_path = output_dir / f"{model_name}_best.pt"
+    checkpoint_path = output_paths["checkpoints"] / f"{model_name}_best.pt"
 
     for epoch in range(config.epochs):
         start = time.time()
@@ -642,6 +644,18 @@ def train_model(
             print(f"[{display_name}] Early stopping.", flush=True)
             break
 
+        reached_perfect_train = (
+            config.stop_at_perfect_train
+            and epoch + 1 >= config.min_epochs
+            and train_accuracy >= 0.9999
+        )
+        if reached_perfect_train:
+            print(
+                f"[{display_name}] Training accuracy reached 100%; stopping this model.",
+                flush=True,
+            )
+            break
+
     if best_state is None:
         raise RuntimeError(f"No checkpoint was saved for {model_name}")
 
@@ -656,25 +670,25 @@ def train_model(
         risk_map,
     )
 
-    plot_history(history, output_dir / f"{model_name}_history.png", display_name)
+    plot_history(history, output_paths["figures"] / f"{model_name}_history.png", display_name)
     plot_risk_confusion(
         test_metrics["risk_labels"],
         test_metrics["risk_matrix"],
-        output_dir / f"{model_name}_risk_confusion.png",
+        output_paths["figures"] / f"{model_name}_risk_confusion.png",
         f"{display_name} risk confusion",
     )
 
-    save_csv(test_metrics["per_class_metrics"], output_dir / f"{model_name}_per_class_metrics.csv")
-    save_csv(test_metrics["prediction_records"], output_dir / f"{model_name}_predictions.csv")
+    save_csv(test_metrics["per_class_metrics"], output_paths["tables"] / f"{model_name}_per_class_metrics.csv")
+    save_csv(test_metrics["prediction_records"], output_paths["predictions"] / f"{model_name}_predictions.csv")
     save_csv(
         compute_top_confusions(test_metrics["prediction_records"]),
-        output_dir / f"{model_name}_top_confusions.csv",
+        output_paths["tables"] / f"{model_name}_top_confusions.csv",
     )
     abstention_rows = compute_abstention_table(
         test_metrics["prediction_records"],
         config.abstention_thresholds,
     )
-    save_csv(abstention_rows, output_dir / f"{model_name}_abstention.csv")
+    save_csv(abstention_rows, output_paths["tables"] / f"{model_name}_abstention.csv")
 
     print(f"\n  TEST RESULTS — {display_name}", flush=True)
     print(f"  {'Top-1':>10}  {'Top-3':>10}  {'Macro F1':>10}  {'Danger':>10}", flush=True)
@@ -716,6 +730,12 @@ def _serialize_config(config: ExperimentConfig) -> dict[str, Any]:
 def run_experiment(config: ExperimentConfig) -> dict[str, Any]:
     set_seed(config.seed)
     output_dir = ensure_dir(config.output_dir)
+    output_paths = {
+        "figures": ensure_dir(output_dir / "figures"),
+        "tables": ensure_dir(output_dir / "tables"),
+        "predictions": ensure_dir(output_dir / "predictions"),
+        "checkpoints": ensure_dir(output_dir / "checkpoints"),
+    }
 
     raw_samples, metadata_stats = load_species_samples(
         metadata_path=config.metadata_path,
@@ -795,16 +815,16 @@ def run_experiment(config: ExperimentConfig) -> dict[str, Any]:
             species_display_lookup,
             config,
             device,
-            output_dir,
+            output_paths,
             class_weights,
             risk_map,
         )
         results.append(model_result)
         abstention_tables[model_name] = abstention_rows
 
-    save_csv(results, output_dir / "results.csv")
-    plot_model_comparison(results, output_dir / "model_comparison.png")
-    plot_abstention_comparison(abstention_tables, output_dir / "abstention_comparison.png")
+    save_csv(results, output_paths["tables"] / "results.csv")
+    plot_model_comparison(results, output_paths["figures"] / "model_comparison.png")
+    plot_abstention_comparison(abstention_tables, output_paths["figures"] / "abstention_comparison.png")
 
     return {
         "output_dir": str(output_dir),

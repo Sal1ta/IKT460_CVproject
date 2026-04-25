@@ -117,6 +117,8 @@ For a longer run:
 python run.py --preset full
 ```
 
+If you manually ask for 15 epochs, the model will now run those epochs unless it reaches 100% training accuracy. Patience-based early stopping is only shortened when you explicitly pass `--patience`.
+
 On JupyterHub, run it in the background with:
 
 ```bash
@@ -187,30 +189,40 @@ The saved comparison focuses on:
 Each full run saves:
 
 - `metadata.json`
-- `results.csv`
-- `model_comparison.png`
-- `abstention_comparison.png`
-- one checkpoint per model
-- one training-history plot per model
-- one risk confusion matrix per model
-- one per-class metrics CSV per model
-- one prediction CSV per model
-- one top-confusions CSV per model
-- one abstention CSV per model
+
+```text
+outputs/df20_species_project/
+  metadata.json
+  figures/
+    model_comparison.png
+    abstention_comparison.png
+    <model>_history.png
+    <model>_risk_confusion.png
+  tables/
+    results.csv
+    <model>_per_class_metrics.csv
+    <model>_top_confusions.csv
+    <model>_abstention.csv
+  predictions/
+    <model>_predictions.csv
+  checkpoints/
+    <model>_best.pt
+```
 
 ## Notebook Workflow
 
-Open `notebooks/df20_species_project.ipynb`.
+Open `notebooks/analysis.ipynb`.
 
 The notebook is designed to:
 
 - load finished results by default
-- summarize `results.csv`
-- display the comparison plots
+- summarize `tables/results.csv`
+- display comparison graphs
+- display training curves
+- display risk confusion matrices
+- build a readable species confusion matrix for the best model
 - compare abstention behaviour across models
 - inspect the most important risky confusions
-
-Keep `RUN_TRAINING = False` unless you intentionally want to launch training from inside the notebook.
 
 ## Important Modeling Choices
 

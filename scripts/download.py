@@ -5,8 +5,8 @@ Downloads the DF20 metadata zip and extracts the CSV files.
 Images must be downloaded separately (~6.5 GB).
 
 Usage:
-    python scripts/setup_df20.py --data-dir data/df20
-    python scripts/setup_df20.py --data-dir data/df20 --verify-images
+    python scripts/download.py --data-dir data/df20
+    python scripts/download.py --data-dir data/df20 --verify-images
 """
 from __future__ import annotations
 
@@ -126,15 +126,14 @@ def print_next_steps(data_dir: Path, csvs: dict[str, Path]) -> None:
 
     print("2. Run training:")
     print()
-    print("   python scripts/train_df20_models.py \\")
+    print("   python run.py")
+    print()
+    print("   If your files are not in the default data/df20 paths, use:")
+    print("   python run.py \\")
     print(f"       --train-metadata-path \"{train}\" \\")
     print(f"       --val-metadata-path   \"{val}\" \\")
     print(f"       --test-metadata-path  \"{test}\" \\")
-    print(f"       --images-root         \"{data_dir}/images\" \\")
-    print("       --models resnet50 resnext50_32x4d seresnet50 convnext_tiny \\")
-    print("       --top-species 100 --min-images-per-species 30 \\")
-    print("       --epochs 15 --batch-size 32 \\")
-    print("       --output-dir outputs/df20_species_project")
+    print(f"       --images-root         \"{data_dir}/images\"")
     print()
 
 
