@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import random
-from collections import Counter
+from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -266,34 +266,70 @@ def load_species_samples(
     return all_samples, stats
 
 
-def stratified_split(
+def _uses_observation_groups(samples: list[SpeciesSample]) -> bool:
+    return sum(bool(sample.observation_id) for sample in samples) >= max(1, int(0.8 * len(samples)))
+
+
+def _sample_group_key(sample: SpeciesSample) -> str:
+    if sample.observation_id:
+        return f"obs::{sample.observation_id}"
+    return f"image::{sample.path}"
+
+
+def _group_species_label(samples: list[SpeciesSample]) -> str:
+    return Counter(sample.species_key for sample in samples).most_common(1)[0][0]
+
+
+def split_sample_groups(
+    samples: list[SpeciesSample],
+    holdout_size: float,
+    seed: int,
+) -> tuple[list[SpeciesSample], list[SpeciesSample]]:
+    grouped: dict[str, list[SpeciesSample]] = defaultdict(list)
+    for sample in samples:
+        grouped[_sample_group_key(sample)].append(sample)
+
+    group_keys = sorted(grouped)
+    group_labels = [_group_species_label(grouped[key]) for key in group_keys]
+    label_counts = Counter(group_labels)
+    can_stratify = len(label_counts) > 1 and min(label_counts.values()) >= 2
+
+    keep_keys, holdout_keys = train_test_split(
+        group_keys,
+        test_size=holdout_size,
+        random_state=seed,
+        stratify=group_labels if can_stratify else None,
+    )
+
+    keep = [sample for key in keep_keys for sample in grouped[key]]
+    holdout = [sample for key in holdout_keys for sample in grouped[key]]
+    return keep, holdout
+
+
+def grouped_stratified_split(
     samples: list[SpeciesSample],
     seed: int,
     val_size: float,
     test_size: float,
-) -> dict[str, list[SpeciesSample]]:
-    labels = [sample.species_key for sample in samples]
-    can_stratify = min(Counter(labels).values()) >= 2
-
-    train_samples, temp_samples, _, temp_labels = train_test_split(
+) -> tuple[dict[str, list[SpeciesSample]], str]:
+    train_samples, temp_samples = split_sample_groups(
         samples,
-        labels,
-        test_size=val_size + test_size,
-        random_state=seed,
-        stratify=labels if can_stratify else None,
+        holdout_size=val_size + test_size,
+        seed=seed,
     )
 
     relative_test_size = test_size / (val_size + test_size)
-    temp_counts = Counter(temp_labels)
-    can_stratify_temp = min(temp_counts.values()) >= 2 if temp_counts else False
-
-    val_samples, test_samples = train_test_split(
+    val_samples, test_samples = split_sample_groups(
         temp_samples,
-        test_size=relative_test_size,
-        random_state=seed,
-        stratify=temp_labels if can_stratify_temp else None,
+        holdout_size=relative_test_size,
+        seed=seed + 1,
     )
-    return {"train": train_samples, "val": val_samples, "test": test_samples}
+    strategy = (
+        "observation_grouped_stratified_from_single_table"
+        if _uses_observation_groups(samples)
+        else "image_level_stratified_from_single_table"
+    )
+    return {"train": train_samples, "val": val_samples, "test": test_samples}, strategy
 
 
 def build_splits(
@@ -314,7 +350,7 @@ def build_splits(
             split_groups["test"].append(sample)
 
     if not split_groups["train"] and not split_groups["test"]:
-        return stratified_split(samples, seed, val_size, test_size), "stratified_from_single_table"
+        return grouped_stratified_split(samples, seed, val_size, test_size)
 
     if not split_groups["train"] or not split_groups["test"]:
         raise ValueError(
@@ -324,15 +360,16 @@ def build_splits(
 
     if not split_groups["val"]:
         train_samples = split_groups["train"]
-        train_labels = [sample.species_key for sample in train_samples]
-        can_stratify = min(Counter(train_labels).values()) >= 2
-        split_groups["train"], split_groups["val"] = train_test_split(
+        split_groups["train"], split_groups["val"] = split_sample_groups(
             train_samples,
-            test_size=val_size,
-            random_state=seed,
-            stratify=train_labels if can_stratify else None,
+            holdout_size=val_size,
+            seed=seed,
         )
-        strategy = "provided_train_test_plus_generated_val"
+        strategy = (
+            "provided_train_test_plus_observation_grouped_val"
+            if _uses_observation_groups(train_samples)
+            else "provided_train_test_plus_image_level_val"
+        )
     else:
         strategy = "provided_train_val_test"
 

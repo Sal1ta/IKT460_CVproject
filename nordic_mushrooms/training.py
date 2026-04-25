@@ -530,6 +530,64 @@ def plot_abstention_comparison(
     plt.close(fig)
 
 
+def split_distribution_rows(splits: dict[str, list[SpeciesSample]]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    all_species = sorted({sample.species_key for split_samples in splits.values() for sample in split_samples})
+    display_lookup = {}
+    for split_samples in splits.values():
+        for sample in split_samples:
+            display_lookup.setdefault(sample.species_key, sample.species_name)
+
+    for species_key in all_species:
+        row = {
+            "species_key": species_key,
+            "species_name": display_lookup.get(species_key, species_key),
+        }
+        total = 0
+        for split_name in ("train", "val", "test"):
+            count = sum(sample.species_key == species_key for sample in splits[split_name])
+            row[f"{split_name}_count"] = count
+            total += count
+        row["total_count"] = total
+        rows.append(row)
+
+    rows.sort(key=lambda row: (-row["total_count"], row["species_key"]))
+    return rows
+
+
+def split_summary_rows(splits: dict[str, list[SpeciesSample]]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for split_name, split_samples in splits.items():
+        counts = Counter(sample.species_key for sample in split_samples)
+        observation_ids = {sample.observation_id for sample in split_samples if sample.observation_id}
+        max_count = max(counts.values()) if counts else 0
+        min_count = min(counts.values()) if counts else 0
+        rows.append(
+            {
+                "split": split_name,
+                "num_images": len(split_samples),
+                "num_species": len(counts),
+                "num_observations": len(observation_ids),
+                "largest_species_count": max_count,
+                "smallest_species_count": min_count,
+                "imbalance_ratio": (max_count / min_count) if min_count else 0.0,
+            }
+        )
+    return rows
+
+
+def observation_overlap_counts(splits: dict[str, list[SpeciesSample]]) -> dict[str, int]:
+    split_to_observations = {
+        split_name: {sample.observation_id for sample in split_samples if sample.observation_id}
+        for split_name, split_samples in splits.items()
+    }
+    return {
+        "train_val": len(split_to_observations["train"] & split_to_observations["val"]),
+        "train_test": len(split_to_observations["train"] & split_to_observations["test"]),
+        "val_test": len(split_to_observations["val"] & split_to_observations["test"]),
+    }
+
+
 def train_model(
     model_name: str,
     dataloaders: dict[str, DataLoader],
@@ -788,6 +846,7 @@ def run_experiment(config: ExperimentConfig) -> dict[str, Any]:
         "class_keys": class_keys,
         "species_display_lookup": species_display_lookup,
         "split_sizes": {split_name: len(split_samples) for split_name, split_samples in splits.items()},
+        "observation_overlap_counts": observation_overlap_counts(splits),
         "selected_species_counts_train": selected_species_counts,
         "use_weighted_sampler": config.use_weighted_sampler,
         "use_class_weights": config.use_class_weights,
@@ -804,6 +863,8 @@ def run_experiment(config: ExperimentConfig) -> dict[str, Any]:
     }
     with (output_dir / "metadata.json").open("w", encoding="utf-8") as handle:
         json.dump(metadata, handle, indent=2, ensure_ascii=False)
+    save_csv(split_summary_rows(splits), output_paths["tables"] / "split_summary.csv")
+    save_csv(split_distribution_rows(splits), output_paths["tables"] / "species_distribution.csv")
 
     results: list[dict[str, Any]] = []
     abstention_tables: dict[str, list[dict[str, Any]]] = {}

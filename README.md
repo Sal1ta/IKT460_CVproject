@@ -87,6 +87,14 @@ You need:
 
 If the official dataset gives you **separate train/test metadata files**, use those directly.
 
+## Split Strategy
+
+The project uses the official DF20 public test metadata as the final held-out test set. If no validation metadata file is provided, validation is created from the training metadata.
+
+When `observation_id` is available, the generated validation split is **observation-based**: all images from the same observation stay in either training or validation. This avoids the most important leakage risk from near-duplicate images of the same mushroom observation.
+
+The raw DF20 distribution is long-tailed, so the code selects the top species subset by default and uses macro F1 plus optional weighted sampling. This makes the comparison fair across models because every model sees the same selected species, same splits, and same training recipe.
+
 ## Example Training Commands
 
 ### Simple default command
@@ -200,6 +208,8 @@ outputs/df20_species_project/
     <model>_risk_confusion.png
   tables/
     results.csv
+    split_summary.csv
+    species_distribution.csv
     <model>_per_class_metrics.csv
     <model>_top_confusions.csv
     <model>_abstention.csv
